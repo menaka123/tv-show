@@ -1,8 +1,23 @@
 import React, {Component, Fragment} from 'react';
 import { Input } from 'antd';
-import 'antd/dist/antd.css';
+import {withRouter} from "react-router";
+import PropTypes from 'prop-types';
 
-export default class Index extends Component {
+class Index extends Component {
+
+    redirect (val)
+    {
+        if (val.length)
+        {
+            this.props.searched(val);
+            if (this.props.history.location.pathname !== '/results')
+            {
+                this.props
+                    .history
+                    .push('/results');
+            }
+        }
+    }
 
     render() {
         return (
@@ -14,7 +29,7 @@ export default class Index extends Component {
                         </a>
                         <Input.Search
                             placeholder="Search here..."
-                            onSearch={value => console.log(value)}
+                            onSearch={value => this.redirect(value)}
                             style={{ width: 200 }}
                         />
                     </div>
@@ -23,3 +38,12 @@ export default class Index extends Component {
         );
     }
 }
+
+export default withRouter(Index);
+
+
+Index.propTypes =
+    {
+        searched: PropTypes.func
+    };
+

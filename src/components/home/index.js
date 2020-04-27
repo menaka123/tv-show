@@ -1,8 +1,21 @@
 import React, {Component, Fragment} from 'react';
 import './home.scss';
 import { Input } from 'antd';
+import PropTypes from 'prop-types';
+import {withRouter} from "react-router";
 
-export default class Home extends Component {
+class Index extends Component {
+
+    redirect (val)
+    {
+        if (val.length)
+        {
+            this.props.searched(val);
+            this.props
+                .history
+                .push('/results');
+        }
+    }
 
     render() {
         return (
@@ -25,7 +38,7 @@ export default class Home extends Component {
                                 enterButton="Search"
                                 size="large"
                                 style={{ maxWidth: 400 }}
-                                onSearch={value => console.log(value)}
+                                onSearch={value => this.redirect(value)}
                             />
                         </div>
                     </div>
@@ -34,3 +47,10 @@ export default class Home extends Component {
         );
     }
 }
+
+export default withRouter(Index);
+
+Index.propTypes =
+    {
+        searched: PropTypes.func
+    };
