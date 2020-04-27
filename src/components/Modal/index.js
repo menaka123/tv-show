@@ -2,6 +2,7 @@ import React, { Component } from 'react';
 import PropTypes from 'prop-types';
 import './modal.scss';
 import classnames from 'classnames';
+import { Button } from 'antd';
 
 export default class Modal extends Component
 {
@@ -18,7 +19,9 @@ export default class Modal extends Component
     static getDerivedStateFromProps(props, prevState)
     {
         let newState = {}
-        
+
+        console.log(props.details)
+
         if (props.visible != null &&
             props.visible !== prevState.visible)
             newState.visible = props.visible;
@@ -29,7 +32,7 @@ export default class Modal extends Component
         
         return (Object.keys(newState).length === 0) ? null : newState;
     }
-    
+
     render()
     {
         return (
@@ -45,36 +48,35 @@ export default class Modal extends Component
             >
                 <div className="card" onClick={(e) => e.stopPropagation()}>
                     <div className="header">
-                        <div className="title">{ this.props.title }</div>
-                        <ion-icon name="ios-close" onClick={this.close.bind(this)}/>
+                        <div className="title">{ this.props.details.show && this.props.details.show.name }</div>
                     </div>
                     {
-                        this.props.description &&
+                        (this.props.details.show && this.props.details.show.genres.length) ?
                         <div className="description">
-                            { this.props.description }
+                           ( { this.props.details.show.genres.join(' ,') } )
                         </div>
+                            :
+                            null
                     }
                     <div className="body">
                         { this.props.children }
                     </div>
                     <div className="footer">
-                        {/*{*/}
-                            {/*!this.state.loading &&*/}
-                            {/*<UikButton onClick={this.onCancel.bind(this)}>*/}
-                                {/*Cancel*/}
-                            {/*</UikButton>*/}
-                        {/*}*/}
-                        {/*{*/}
-                            {/*this.props.actionButtonLabel && this.props.onAction &&*/}
-                            {/*<UikButton*/}
-                                {/*primary */}
-                                {/*isLoading={this.state.loading}*/}
-                                {/*className="actionButton"*/}
-                                {/*onClick={() => this.props.onAction()}*/}
-                            {/*>*/}
-                                {/*{ this.props.actionButtonLabel }*/}
-                            {/*</UikButton>*/}
-                        {/*}*/}
+                        {
+                            !this.state.loading &&
+                            <Button
+                                onClick={() => this.props.onClose()}
+                                size="small">
+                                Close
+                            </Button>
+                        }
+                        {
+                            this.props.actionButtonLabel && this.props.onAction &&
+                            <Button type='primary' size="small" loading>
+                                { this.props.actionButtonLabel }
+                            </Button>
+                        }
+
                     </div>
                 </div>
             </div>
@@ -94,7 +96,7 @@ export default class Modal extends Component
     {
         if (this.props.onCancel != null)
         {
-            this.props.onCancel();
+            this.props.onClose();
         }
     }
 }
@@ -111,5 +113,6 @@ Modal.propTypes =
     large: PropTypes.bool,
     animateFromBottom: PropTypes.bool,
     className: PropTypes.string,
+    details: PropTypes.object,
     autoHeight: PropTypes.bool
 };
