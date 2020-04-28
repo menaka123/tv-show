@@ -3,14 +3,17 @@ import PropTypes from 'prop-types';
 import {Card, Divider, Row, Col} from 'antd';
 import API from "../API";
 import Modal from "../Modal";
+import './results.scss';
 import ReactHtmlParser from 'react-html-parser';
+import {withRouter} from "react-router";
 
-export default class Index extends Component {
+class Index extends Component {
 
     constructor(props) {
         super(props);
         this.state = {
             shows: [],
+            screenWidth: 1000,
             showModal: false,
             modalItem: {}
         }
@@ -30,12 +33,11 @@ export default class Index extends Component {
     getSearch ()
     {
         let q = this.props.search;
-
+        this.setState({screenWidth: window.innerWidth});
         if (q && q.length) {
             API.getInstance()
                 .GET('search/shows', {q})
                 .then(res => {
-                    console.log(res)
                     this.setState({
                         shows: res
                     })
@@ -59,22 +61,24 @@ export default class Index extends Component {
         })
     }
 
-    showDetails ()
+    showDetails (id)
     {
-
+        this.props
+            .history
+            .push(`/details/${id}`);
     }
 
     render() {
         return (
             <Fragment>
                 <Divider orientation="left" style={{ color: '#333', fontWeight: 'normal' }}>
-                    Horizontal
+                    Showing {this.state.shows.length} results.
                 </Divider>
 
                 <Row gutter={[16, 16]}>
                     {
                         this.state.shows.map((item, index) => {
-                            return <Col key={index} xs={24} sm={24} md={6} lg={6} >
+                            return <Col key={index} xs={24} sm={12} md={6} lg={6} >
                                 <Card
                                     onClick={() => this.openModal(item)}
                                     hoverable
@@ -82,18 +86,15 @@ export default class Index extends Component {
                                         item.show.image ?
                                             <img
                                                 alt="example"
-                                                src={ item.show.image.medium }
+                                                src={ (this.state.screenWidth > 768) ?
+                                                    item.show.image.medium :
+                                                    item.show.image.original
+                                                }
                                             />
                                             :
                                             <div
-                                                className={'align-middle'}
-                                                 style={
-                                                     {
-                                                         height: '309.75px',
-                                                         textAlign: 'center',
-                                                         verticalAlign: 'middle',
-                                                         lineHeight: '309.75px'
-                                                     }}>
+                                                className={'align-middle no-preview'}
+                                            >
                                                 No Preview
                                             </div>
                                     }
@@ -103,7 +104,7 @@ export default class Index extends Component {
                                         description={
                                             <div>
                                                 <p>
-                                                   Score: <strong>{ item.score.toFixed(2) }</strong>
+                                                   Score: <strong>{ item.show.rating.average }</strong>
                                                 </p>
                                                 {
                                                     item.show.genres.length ?
@@ -127,7 +128,7 @@ export default class Index extends Component {
                     details={ this.state.modalItem }
                     actionButtonLabel='Info'
                     large={true}
-                    onAction={ () => this.showDetails() }
+                    onAction={ () => this.showDetails(this.state.modalItem.show.id) }
                 >
                     <Row>
                         <Col  xs={24} sm={24} md={12} lg={12} >
@@ -152,6 +153,8 @@ export default class Index extends Component {
         );
     }
 }
+
+export default withRouter(Index);
 
 Index.propTypes =
     {

@@ -7,6 +7,7 @@ import 'antd/dist/antd.css';
 import Home from './components/home';
 import TopBar from './components/TopBar';
 import Results from './components/Results';
+import Details from  './components/Details';
 
 class App extends Component
 {
@@ -37,6 +38,9 @@ class App extends Component
                       exact
                       search={ this.state.search }
                       path='/results' />
+                  <Details
+                      exact
+                      path='/details/:id' />
               </Switch>
           </div>
       </HashRouter>

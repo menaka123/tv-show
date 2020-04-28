@@ -1,0 +1,23 @@
+@import "../../styles/vars.scss";
+
+.header
+{
+  display: flex;
+  flex-direction: row;
+  justify-content: space-between;
+  padding: 0 20px;
+
+  .title
+  {
+    font-size: 20px;
+    font-weight: 600;
+    margin-right: 16px;
+    color: $textMain;
+  }
+}
+.description
+{
+  line-height: 1.4em;
+  margin-top: 4px;
+  padding: 0 20px;
+}

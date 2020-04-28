@@ -20,8 +20,6 @@ export default class Modal extends Component
     {
         let newState = {}
 
-        console.log(props.details)
-
         if (props.visible != null &&
             props.visible !== prevState.visible)
             newState.visible = props.visible;
@@ -72,7 +70,9 @@ export default class Modal extends Component
                         }
                         {
                             this.props.actionButtonLabel && this.props.onAction &&
-                            <Button type='primary' size="small" loading>
+                            <Button
+                                onClick={() => this.props.onAction()}
+                                type='primary' size="small" >
                                 { this.props.actionButtonLabel }
                             </Button>
                         }

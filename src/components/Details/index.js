@@ -1,8 +1,8 @@
 import React, {Component, Fragment} from 'react';
 import PropTypes from 'prop-types';
-import {Card, Divider, Row, Col} from 'antd';
+import './details.scss';
+import {Descriptions, Row, Col, List} from 'antd';
 import API from "../API";
-import Modal from "../Modal";
 import ReactHtmlParser from 'react-html-parser';
 
 export default class Index extends Component {
@@ -10,22 +10,11 @@ export default class Index extends Component {
     constructor(props) {
         super(props);
         this.state = {
-            shows: [],
-            showModal: false,
-            modalItem: {}
+            show: null,
+            episodes: []
         }
     }
 
-    componentDidMount ()
-    {
-        this.getSearch();
-    }
-
-    componentDidUpdate (prevProps) {
-        if (prevProps.search !== this.props.search) {
-            this.getSearch()
-        }
-    }
 
     getSearch ()
     {
@@ -51,103 +40,127 @@ export default class Index extends Component {
         return genres.length > 2 ? `${genres.slice(0, 2).join(', ')}, ...` : genres.join(', ')
     }
 
-    openModal (modalItem)
-    {
-        this.setState({
-            modalItem,
-            showModal: true,
-        })
-    }
-
     showDetails ()
     {
+
+    }
+
+    componentDidMount ()
+    {
+        let id = this.props.computedMatch.params.id;
+
+        if (id) {
+            API.getInstance()
+                .GET(`shows/${id}`)
+                .then(res => {
+                    this.setState({
+                        show: res
+                    })
+                })
+                .catch(err => {
+                    console.log(err)
+                })
+
+            API.getInstance()
+                .GET(`shows/${id}/episodes`)
+                .then(res => {
+                    this.setState({
+                        episodes: res
+                    })
+                })
+                .catch(err => {
+                    console.log(err)
+                })
+        }
 
     }
 
     render() {
         return (
             <Fragment>
-                <Divider orientation="left" style={{ color: '#333', fontWeight: 'normal' }}>
-                    Horizontal
-                </Divider>
-
-                <Row gutter={[16, 16]}>
-                    {
-                        this.state.shows.map((item, index) => {
-                            return <Col key={index} xs={24} sm={24} md={6} lg={6} >
-                                <Card
-                                    onClick={() => this.openModal(item)}
-                                    hoverable
-                                    cover={
-                                        item.show.image ?
-                                            <img
-                                                alt="example"
-                                                src={ item.show.image.medium }
-                                            />
-                                            :
-                                            <div
-                                                className={'align-middle'}
-                                                 style={
-                                                     {
-                                                         height: '309.75px',
-                                                         textAlign: 'center',
-                                                         verticalAlign: 'middle',
-                                                         lineHeight: '309.75px'
-                                                     }}>
-                                                No Preview
-                                            </div>
-                                    }
-                                >
-                                    <Card.Meta
-                                        title={ item.show.name }
-                                        description={
-                                            <div>
-                                                <p>
-                                                   Score: <strong>{ item.score.toFixed(2) }</strong>
-                                                </p>
-                                                {
-                                                    item.show.genres.length ?
-                                                        <small>
-                                                            ({ Index.genres(item.show.genres) })
-                                                        </small>
-                                                        :
-                                                        <small>&nbsp;</small>
-                                                }
-                                            </div>}
-                                    />
-                                </Card>
-                            </Col>
-                        })
-                    }
-
-                </Row>
-                <Modal
-                    visible={ this.state.showModal }
-                    onClose={ () => this.setState({ showModal: false }) }
-                    details={ this.state.modalItem }
-                    actionButtonLabel='Info'
-                    large={true}
-                    onAction={ () => this.showDetails() }
-                >
-                    <Row>
-                        <Col  xs={24} sm={24} md={12} lg={12} >
-                            <img
-                                src={
-                                    this.state.modalItem.show && this.state.modalItem.show.image ?
-                                        this.state.modalItem.show.image.medium : require('../../img/NoPhotoAvailable.jpg')
+                {
+                    this.state.show && <Fragment>
+                        <Row >
+                            <div className="header">
+                                <div className="title">{this.state.show.name}</div>
+                            </div>
+                        </Row>
+                        <Row>
+                            <div className="description">
+                                Type: {this.state.show.type}
+                            </div>
+                        </Row>
+                        <Row gutter={[16, 16]}>
+                            <Col xs={24} sm={24} md={12} lg={12}>
+                                {
+                                    this.state.show.image ?
+                                        <img
+                                            alt="example"
+                                            src={this.state.show.image.original}
+                                            className="img-fluid"
+                                        />
+                                        :
+                                        <div
+                                            className={'align-middle no-preview'}
+                                        >
+                                            No Preview
+                                        </div>
                                 }
-                                alt="..."
-                                style={{maxWidth: '250px'}}
-                                className={'img-thumbnail'}
+                            </Col>
+                            <Col xs={24} sm={24} md={12} lg={12}>
+                                <Descriptions column={24} title="Info">
+                                    <Descriptions.Item span={24} label="Rating"><strong> { this.state.show.rating.average }</strong></Descriptions.Item>
+                                    <Descriptions.Item span={24} label="Genres"> { this.state.show.genres.join(', ') } </Descriptions.Item>
+                                    <Descriptions.Item span={24} label="Language">{this.state.show.language}</Descriptions.Item>
+                                    <Descriptions.Item span={24} label="Status">{this.state.show.status}</Descriptions.Item>
+                                    <Descriptions.Item span={24} label="Premiered">{this.state.show.premiered}</Descriptions.Item>
+                                    <Descriptions.Item span={24} label="Runtime">{this.state.show.runtime} min</Descriptions.Item>
+                                    <Descriptions.Item span={24} label="Summary">
+                                        {
+                                            ReactHtmlParser (this.state.show.summary)
+                                        }
+                                    </Descriptions.Item>
+                                    {
+                                        this.state.show.officialSite && <Descriptions.Item span={24} label="Link">
+                                            <a href={this.state.show.officialSite}>here</a>
+                                        </Descriptions.Item>
+                                    }
+
+                                </Descriptions>
+                            </Col>
+                        </Row>
+                        <Row>
+                            <h4>Episodes</h4>
+                            <List
+                                itemLayout="vertical"
+                                size="large"
+                                pagination={{
+                                    pageSize: 5,
+                                }}
+                                dataSource={this.state.episodes}
+                                renderItem={item => (
+                                    <List.Item
+                                        key={item.name}
+                                        extra={
+                                            item.image &&
+                                            <img
+                                                width={272}
+                                                alt="logo"
+                                                src={item.image.medium}
+                                            />
+                                        }
+                                    >
+                                        <List.Item.Meta
+                                            title={item.name}
+                                            description={item.airdate}
+                                        />
+                                        {ReactHtmlParser (item.summary)}
+                                    </List.Item>
+                                )}
                             />
-                        </Col>
-                        <Col xs={24} sm={24} md={12} lg={12} >
-                            {
-                                this.state.modalItem.show && ReactHtmlParser (this.state.modalItem.show.summary)
-                            }
-                        </Col>
-                    </Row>
-                </Modal>
+                        </Row>
+                    </Fragment>
+                }
             </Fragment>
         );
     }
